@@ -35,6 +35,7 @@
                 struct v2f
                 {
                     float4 pos : SV_POSITION;
+                    fixed4 color : COLOR0;
                 };
 
 
@@ -42,13 +43,21 @@
                 {
                     v2f output;
                     output.pos = UnityObjectToClipPos(input.vertex);
+                    float3 v = normalize(_WorldSpaceCameraPos - mul(unity_ObjectToWorld, input.vertex));
+                    float3 l = normalize(_WorldSpaceLightPos0);
+                    float3 n = normalize( mul(unity_ObjectToWorld, input.normal));
+                    fixed3 colorA = _AmbientColor * _LightColor0;
+                    fixed3 colorD = max(dot(l, n) , 0) * _DiffuseColor * _LightColor0;
+                    float3 h = normalize(l + v);
+                    fixed3 colorS = pow(max(dot(n, h),0), _Shininess) * _SpecularColor * _LightColor0;
+                    output.color = fixed4(colorA + colorD + colorS, 1.0);
                     return output;
                 }
 
 
                 fixed4 frag (v2f input) : SV_Target
                 {
-                    return fixed4(0, 0, 1.0, 1.0);
+                    return input.color;
                 }
 
             ENDCG

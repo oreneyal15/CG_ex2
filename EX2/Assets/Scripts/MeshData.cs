@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 
@@ -33,12 +34,56 @@ public class MeshData
     // Calculates surface normals for each vertex, according to face orientation
     public void CalculateNormals()
     {
-        // Your implementation
+        var normalsList = new List<Vector3>();
+        
+        for (int i = 0; i < vertices.Count; i++)
+        {
+            List<Vector3> vNormals = new List<Vector3>();
+            for (int j = 0; j < triangles.Count; j = j + 3)
+            {
+                if (i == triangles[j] || i == triangles[j + 1] || i == triangles[j + 2])
+                {
+                    var normal = Vector3.Cross(vertices[triangles[j]] - vertices[triangles[j+2]], vertices[triangles[j+1]] - vertices[triangles[j+2]]);
+                    vNormals.Add(normal);
+                }
+            }
+
+            var currNormal = Vector3.zero;
+            foreach (var normal in vNormals)
+            {
+                currNormal += normal;
+            }
+
+            normalsList.Add(currNormal.normalized);
+        }
+
+        normals = normalsList.ToArray();
     }
 
     // Edits mesh such that each face has a unique set of 3 vertices
     public void MakeFlatShaded()
     {
-        // Your implementation
+        var numVertices = vertices.Count;
+        for (int i = 0; i < numVertices; i++)
+        {
+            Boolean fistAppearance = true;
+            for (int j = 0; j < triangles.Count; j++)
+            {
+                if (triangles[j] == i)
+                {
+                    if (!fistAppearance)
+                    {
+                        vertices.Add(vertices[i]);
+                        triangles[j] = vertices.Count - 1;
+                    }
+                    else
+                    {
+                        fistAppearance = false;
+                    }
+                }
+                
+            }
+        }
+        
     }
 }
