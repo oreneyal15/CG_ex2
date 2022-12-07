@@ -54,7 +54,8 @@ Shader "CG/BlinnPhong"
                         float3 lightPos = float4(unity_4LightPosX0[i], unity_4LightPosY0[i], unity_4LightPosZ0[i], 1.0);
                         float3 l = normalize(lightPos - input.worldPos).xyz;
                         float3 n = normalize(input.normal);
-                        finalColor += max(dot(l, n) , 0) * _DiffuseColor.rgb * unity_LightColor[i].rgb;
+                        float lightPower = 1 / (1 + unity_4LightAtten0[i] * distance(input.worldPos.xyz, lightPos));
+                        finalColor += max(dot(l, n) , 0) * _DiffuseColor.rgb * unity_LightColor[i].rgb * lightPower;
                         
                     }
                     return float4(finalColor, 1.0);
